@@ -1,78 +1,99 @@
 package com.driver;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Repository;
 
-@RestController
-@RequestMapping("students")
-public class StudentController {
+@Repository
+public class StudentRepository {
 
-    @PostMapping("/add-student")
-    public ResponseEntity<String> addStudent(@RequestBody Student student){
-
-        return new ResponseEntity<>("New student added successfully", HttpStatus.CREATED);
-    }
-
-    @PostMapping("/add-teacher")
-    public ResponseEntity<String> addTeacher(@RequestBody Teacher teacher){
-
-        return new ResponseEntity<>("New teacher added successfully", HttpStatus.CREATED);
-    }
-
-    @PutMapping("/add-student-teacher-pair")
-    public ResponseEntity<String> addStudentTeacherPair(@RequestParam String student, @RequestParam String teacher){
-
-        return new ResponseEntity<>("New student-teacher pair added successfully", HttpStatus.CREATED);
-    }
-
-    @GetMapping("/get-student-by-name/{name}")
-    public ResponseEntity<Student> getStudentByName(@PathVariable String name){
-        Student student = null; // Assign student by calling service layer method
-
-        return new ResponseEntity<>(student, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/get-teacher-by-name/{name}")
-    public ResponseEntity<Teacher> getTeacherByName(@PathVariable String name){
-        Teacher teacher = null; // Assign student by calling service layer method
-
-        return new ResponseEntity<>(teacher, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/get-students-by-teacher-name/{teacher}")
-    public ResponseEntity<List<String>> getStudentsByTeacherName(@PathVariable String teacher){
-        List<String> students = null; // Assign list of student by calling service layer method
-
-        return new ResponseEntity<>(students, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/get-all-students")
-    public ResponseEntity<List<String>> getAllStudents(){
-        List<String> students = null; // Assign list of student by calling service layer method
-
-        return new ResponseEntity<>(students, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/delete-teacher-by-name")
-    public ResponseEntity<String> deleteTeacherByName(@RequestParam String teacher){
-
-        return new ResponseEntity<>(teacher + " removed successfully", HttpStatus.CREATED);
-    }
-    @DeleteMapping("/delete-all-teachers")
-    public ResponseEntity<String> deleteAllTeachers(){
-
-        return new ResponseEntity<>("All teachers deleted successfully", HttpStatus.CREATED);
-    }
+	 HashMap<String,Student> StudentHashMap= new HashMap<>();
+	 HashMap<String,Teacher> TeacherHashMap= new HashMap<>();
+	 HashMap<String,List<String>> TeacherStudentPair= new HashMap<>();
+	public void addStudent(Student student) {
+		// TODO Auto-generated method stub
+		StudentHashMap.put(student.getName(), student);
+	}
+	public void addTeacher(Teacher teacher) {
+		// TODO Auto-generated method stub
+		TeacherHashMap.put(teacher.getName(), teacher);
+	}
+	public void addStudentTeacherPair(String student, String teacher) {
+		// TODO Auto-generated method stub
+		if(StudentHashMap.containsKey(student) && TeacherHashMap.containsKey(teacher))
+		{
+			List<String> StudentList=new ArrayList<>();
+			if(TeacherStudentPair.containsKey(teacher))
+			{
+				StudentList=TeacherStudentPair.get(teacher);
+				
+			}
+			StudentList.add(student);
+			TeacherStudentPair.put(teacher, StudentList);
+					
+		
+		}
+	}
+	public Student getStudentByName(String name) {
+		// TODO Auto-generated method stub
+		return StudentHashMap.get(name);
+	}
+	public Teacher getTeacherByName(String name) {
+		// TODO Auto-generated method stub
+		return TeacherHashMap.get(name);
+	}
+	public List<String> getStudentsByTeacherName(String teacher) {
+		// TODO Auto-generated method stub
+		List<String> list=TeacherStudentPair.get(teacher);
+		return list;
+	}
+	public List<String> getAllStudents() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(StudentHashMap.keySet());
+	}
+	public void deleteTeacherByName(String teacher) {
+		// TODO Auto-generated method stub
+		 List<String> studnets=new ArrayList<>();
+		 if(TeacherStudentPair.containsKey(teacher))
+		 {
+			 studnets=TeacherStudentPair.get(teacher);
+			 for(String student:studnets)
+			 {
+				 if(StudentHashMap.containsKey(student))
+				 {
+					 StudentHashMap.remove(student);
+				 }
+			 }
+			 TeacherStudentPair.remove(teacher);
+		 }
+		 if(TeacherHashMap.containsKey(teacher))
+			 TeacherHashMap.remove(teacher);
+	}
+	public void deleteAllTeachers() {
+		// TODO Auto-generated method stub
+		HashSet<String> StudentSet=new HashSet<>();
+		 TeacherHashMap=new HashMap<>();
+		 
+		 for(String teacher : TeacherStudentPair.keySet())
+		 {
+			 for(String studnet:  TeacherStudentPair.get(teacher))
+			 {
+				 StudentSet.add(studnet);
+			 }
+		 }
+		 
+		 for(String sudent :StudentSet)
+		 {
+			 if(StudentHashMap.containsKey(sudent))
+			 {
+				 StudentHashMap.remove(sudent);
+			 }
+		 }
+	}
+	   
+	   
+	
 }
